@@ -1,0 +1,7 @@
+langchain-community
+langchain-classic
+langchain-text-splitters
+chromadb
+pypdf
+python-dotenv
+langchain-openai
