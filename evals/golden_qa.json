@@ -1,0 +1,150 @@
+{
+  "_schema": {
+    "id": "Stable case ID referenced from docs/TEST_PLAN.md",
+    "category": "reference | single_fact | numeric | multi_hop | list | paraphrase | out_of_scope | false_premise",
+    "question": "What the user types into the CLI",
+    "expected_pages": "List of page groups (1-based). Each inner list is satisfied if ANY of its pages is retrieved; ALL groups must be satisfied.",
+    "must_include": "List of keyword groups. Each inner list is satisfied if ANY variant appears in the answer (case-insensitive, NFKC-normalised); ALL groups must be satisfied.",
+    "must_not_include": "Strings that must not appear in the answer (hallucination traps).",
+    "expect_refusal": "True when the handbook does not answer the question and the model must say so."
+  },
+  "cases": [
+    {"id": "GQ-01", "category": "reference",
+     "question": "What is the policy on time loop tardiness and Friday refrigerator purges?",
+     "expected_pages": [[2], [3]],
+     "must_include": [["notify your manager", "notify their manager", "notify the manager", "HR portal"], ["eight hours", "8 hours"], ["unpaid"], ["4:00 PM", "4 PM", "4:00 p.m", "4pm"], ["Gelatinous Cube"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-02", "category": "numeric",
+     "question": "What are the standard office hours?",
+     "expected_pages": [[2]],
+     "must_include": [["9:00 AM", "9 AM", "9am", "9:00am"], ["5:00 PM", "5 PM", "5pm", "5:00pm"], ["Monday"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-03", "category": "multi_hop",
+     "question": "What are all the password requirements?",
+     "expected_pages": [[3], [4]],
+     "must_include": [["16"], ["Sumerian"], ["30 days"], ["4,000", "4000"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-04", "category": "list",
+     "question": "Which pets are not allowed in the office?",
+     "expected_pages": [[3]],
+     "must_include": [["dragon"], ["dire wol"], ["face-hugger", "face hugger", "facehugger"], ["blood sacrifice"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-05", "category": "numeric",
+     "question": "Can I bring my pet iguana to work? It weighs 12 pounds.",
+     "expected_pages": [[3]],
+     "must_include": [["10 pounds", "10 lb", "ten pounds"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-06", "category": "single_fact",
+     "question": "My coworker and I couldn't settle an argument by talking. What happens next?",
+     "expected_pages": [[4]],
+     "must_include": [["Rock-Paper-Scissors-Lizard-Spock", "Rock, Paper, Scissors, Lizard, Spock", "Lizard"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-07", "category": "paraphrase",
+     "question": "The fire in the building is green. Where should I go?",
+     "expected_pages": [[5]],
+     "must_include": [["roof"]],
+     "must_not_include": ["basement"], "expect_refusal": false},
+
+    {"id": "GQ-08", "category": "paraphrase",
+     "question": "What should I do if the fire is singing show tunes?",
+     "expected_pages": [[5]],
+     "must_include": [["basement"], ["ears"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-09", "category": "single_fact",
+     "question": "If I get abducted by aliens, how is my time on the mothership recorded?",
+     "expected_pages": [[5]],
+     "must_include": [["PTO", "paid time off"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-10", "category": "single_fact",
+     "question": "A copier malfunction split me into two people. Which one is evil and what must it do?",
+     "expected_pages": [[5]],
+     "must_include": [["goatee"], ["Floor 13", "Villainy"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-11", "category": "single_fact",
+     "question": "How much notice do I need to give when resigning, and can I resign through interpretive dance?",
+     "expected_pages": [[5]],
+     "must_include": [["two weeks", "2 weeks"], ["writing", "written"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-12", "category": "single_fact",
+     "question": "When am I allowed to fly first class on a business trip?",
+     "expected_pages": [[4]],
+     "must_include": [["volcan"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-13", "category": "single_fact",
+     "question": "Are bribes to interdimensional toll trolls reimbursable?",
+     "expected_pages": [[4]],
+     "must_include": [["receipt"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-14", "category": "single_fact",
+     "question": "What name should I use when greeting the coffee machine?",
+     "expected_pages": [[4]],
+     "must_include": [["Clarence"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-15", "category": "single_fact",
+     "question": "Who is allowed to use telepathy at work?",
+     "expected_pages": [[2]],
+     "must_include": [["middle management"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-16", "category": "single_fact",
+     "question": "What happens if I materialize inside the breakroom vending machine while wormhole commuting?",
+     "expected_pages": [[2]],
+     "must_include": [["verbal warning"], ["deduct", "damaged snacks"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-17", "category": "single_fact",
+     "question": "Why can't I microwave the Shrink Ray battery packs?",
+     "expected_pages": [[3]],
+     "must_include": [["shoebox", "tiny pizza"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-18", "category": "single_fact",
+     "question": "Which sector requires anti-gravity boots?",
+     "expected_pages": [[1]],
+     "must_include": [["4G"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-19", "category": "list",
+     "question": "What items are banned from the communal fridge?",
+     "expected_pages": [[3]],
+     "must_include": [["sentient"], ["isotope"], ["durian"]],
+     "must_not_include": [], "expect_refusal": false},
+
+    {"id": "GQ-20", "category": "out_of_scope",
+     "question": "How many weeks of parental leave do employees get?",
+     "expected_pages": [],
+     "must_include": [],
+     "must_not_include": [], "expect_refusal": true},
+
+    {"id": "GQ-21", "category": "out_of_scope",
+     "question": "What is the company's 401(k) matching percentage?",
+     "expected_pages": [],
+     "must_include": [],
+     "must_not_include": ["%"], "expect_refusal": true},
+
+    {"id": "GQ-22", "category": "false_premise",
+     "question": "How many free bagels does each employee get on Free Bagel Fridays?",
+     "expected_pages": [[1]],
+     "must_include": [],
+     "must_not_include": [], "expect_refusal": true},
+
+    {"id": "GQ-23", "category": "false_premise",
+     "question": "What is the dress code for Casual Time-Travel Mondays?",
+     "expected_pages": [[2]],
+     "must_include": [["Friday"]],
+     "must_not_include": [], "expect_refusal": false}
+  ]
+}

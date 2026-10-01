@@ -8,7 +8,6 @@ ChatOpenAI(gpt-4o-mini, temperature=0).
 from __future__ import annotations
 
 import os
-import shutil
 import warnings
 from pathlib import Path
 
@@ -91,20 +90,20 @@ class RAGEngine:
         return chunks
 
     def _build_or_load_vectorstore(self, rebuild: bool) -> Chroma:
+        store = Chroma(
+            collection_name=COLLECTION_NAME,
+            embedding_function=self.embeddings,
+            persist_directory=str(self.persist_dir),
+        )
         # Reuse an existing index unless asked to rebuild (saves embedding calls).
-        if not rebuild and self.persist_dir.exists() and any(self.persist_dir.iterdir()):
-            store = Chroma(
-                collection_name=COLLECTION_NAME,
-                embedding_function=self.embeddings,
-                persist_directory=str(self.persist_dir),
-            )
-            if store._collection.count() > 0:
-                self.num_pages, self.num_chunks = None, store._collection.count()
-                self.loaded_from_disk = True
-                return store
+        if not rebuild and store._collection.count() > 0:
+            self.num_pages, self.num_chunks = None, store._collection.count()
+            self.loaded_from_disk = True
+            return store
 
-        if self.persist_dir.exists():
-            shutil.rmtree(self.persist_dir)
+        # Clear through Chroma rather than deleting files: chromadb caches clients
+        # per path, so removing the folder under a live client corrupts later writes.
+        store.delete_collection()
         chunks = self.load_and_split()
         self.loaded_from_disk = False
         return Chroma.from_documents(
