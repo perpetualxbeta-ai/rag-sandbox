@@ -66,6 +66,15 @@ python benchmark.py --rebuild             # ingest + index + 100 queries
 
 Or step by step: `python ingest.py`, `python index_db.py`, `python benchmark.py`.
 
+If you already run Postgres locally on 5432 (you'll see `role "rag" does not exist`), put the
+container on another port and point the scripts at it:
+
+```bash
+PG_HOST_PORT=5433 docker compose up -d
+export PG_DSN=postgresql://rag:rag@localhost:5433/rag
+python benchmark.py --rebuild
+```
+
 **How it's measured.** Both engines use HNSW `m=16, ef_construction=64, ef_search=64`.
 Loading and indexing are timed separately: pgvector bulk-loads with `COPY` and then runs
 `CREATE INDEX`; Qdrant uploads with HNSW indexing disabled, then enables it and waits for
