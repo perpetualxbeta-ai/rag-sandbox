@@ -2,12 +2,13 @@ services:
   pgvector:
     image: pgvector/pgvector:pg16
     container_name: rag-pgvector
+    shm_size: 1g   # parallel HNSW builds at --scale 50+ need more than Docker's 64MB /dev/shm
     environment:
       POSTGRES_USER: rag
       POSTGRES_PASSWORD: rag
       POSTGRES_DB: rag
     ports:
-      - "5432:5432"
+      - "${PG_HOST_PORT:-5432}:5432"   # set PG_HOST_PORT=5433 if a local Postgres already uses 5432
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

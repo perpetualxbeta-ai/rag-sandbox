@@ -3,6 +3,7 @@ sentence-transformers>=3.0
 pypdf
 psycopg[binary]>=3.1
 pgvector>=0.3
-qdrant-client>=1.10
+qdrant-client>=1.16  # Rrf(k=...) for parameterised RRF fusion
 numpy
 reportlab  # only for generate_docs.py (synthetic corpus)
+snowballstemmer  # BM25 tokeniser for Qdrant sparse vectors (same stemmer as Postgres 'english')

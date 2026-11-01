@@ -113,3 +113,71 @@ def write_json(path: Path, data: dict) -> None:
 
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text()) if path.exists() else {}
+
+# --------------------------------------------------------------------------- hybrid / scale
+# Named vectors in the Qdrant collection.
+QDRANT_DENSE = "dense"
+QDRANT_SPARSE = "bm25"
+
+# BM25 parameters for Qdrant's sparse branch (Lucene / Elasticsearch defaults).
+BM25_K1 = float(os.getenv("BM25_K1", "1.2"))
+BM25_B = float(os.getenv("BM25_B", "0.75"))
+
+# pgvector's HNSW build slows down sharply once the graph no longer fits in
+# maintenance_work_mem (default 64MB), which happens around ~40k x 384-d rows.
+PG_MAINTENANCE_WORK_MEM = os.getenv("PG_MAINTENANCE_WORK_MEM", "1GB")
+
+# Bump when the on-disk index layout or replica scheme changes so benchmark.py reindexes.
+INDEX_SCHEMA = 2
+
+
+def corpus_fingerprint() -> str:
+    """Identifies the ingested artifacts an index was built from (size + mtime)."""
+    parts = []
+    for p in (CHUNKS_PATH, EMBEDDINGS_PATH):
+        st = p.stat()
+        parts.append(f"{p.name}:{st.st_size}:{st.st_mtime_ns}")
+    return hashlib.blake2b("|".join(parts).encode(), digest_size=8).hexdigest()
+
+
+def scale_corpus(chunks: list[dict], emb: np.ndarray, factor: int, noise: float = 0.01,
+                 seed: int = 0) -> tuple[list[dict], np.ndarray]:
+    """Multiply the corpus `factor` times with synthetic chunks.
+
+    Replica 0 is the original corpus, unchanged. Each replica r >= 1 of chunk i is
+    blended with a random partner j from the SAME category, with weight w ~ U(0.5, 0.9):
+      embedding = normalise(w*e_i + (1-w)*e_j + N(0, noise))
+      text      = first w of i's words + the rest from j's words
+    It keeps i's metadata (category, filename, page) and gets a new id/doc_id, so the
+    category filter keeps the same ~10% selectivity at every scale.
+
+    Why blends and not noisy copies: N near-identical copies of each chunk fill each
+    HNSW node's neighbour list (2*m = 32 slots) with its own siblings, so every chunk
+    becomes an island the graph search cannot leave - filtered queries then return
+    0 rows even with iterative scans. Blends spread the new points through the space
+    between real chunks, which is closer to what a genuinely larger corpus looks like.
+    """
+    if factor <= 1:
+        return chunks, emb
+    rng = np.random.default_rng(seed)
+    stride = max(c["id"] for c in chunks) + 1
+    by_cat: dict[str, list[int]] = {}
+    for i, c in enumerate(chunks):
+        by_cat.setdefault(c["category"], []).append(i)
+    pools = {k: np.asarray(v) for k, v in by_cat.items()}
+    cats = [c["category"] for c in chunks]
+    words = [c["content"].split() for c in chunks]
+    out_chunks, out_emb = list(chunks), [emb]
+    for r in range(1, factor):
+        partner = np.array([rng.choice(pools[k]) for k in cats])
+        w = rng.uniform(0.5, 0.9, size=(len(chunks), 1)).astype(np.float32)
+        e = w * emb + (1 - w) * emb[partner] + rng.normal(0.0, noise, emb.shape).astype(np.float32)
+        e /= np.linalg.norm(e, axis=1, keepdims=True)
+        out_emb.append(e.astype(np.float32))
+        for i, c in enumerate(chunks):
+            a, b = words[i], words[partner[i]]
+            k = int(round(len(a) * float(w[i, 0])))
+            text = " ".join(a[:k] + b[int(round(len(b) * float(w[i, 0]))):]) or c["content"]
+            out_chunks.append({**c, "id": c["id"] + r * stride,
+                               "doc_id": f"{c['doc_id']}-r{r}", "content": text})
+    return out_chunks, np.concatenate(out_emb)
