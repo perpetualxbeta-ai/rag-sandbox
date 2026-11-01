@@ -2,6 +2,7 @@ services:
   pgvector:
     image: pgvector/pgvector:pg16
     container_name: rag-pgvector
+    shm_size: 1g   # parallel HNSW builds at --scale 50+ need more than Docker's 64MB /dev/shm
     environment:
       POSTGRES_USER: rag
       POSTGRES_PASSWORD: rag
