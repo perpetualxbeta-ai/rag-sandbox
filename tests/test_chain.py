@@ -2,7 +2,7 @@
 
 import pytest
 
-import rag_engine
+import naive_rag_engine
 from fakes import BagOfWordsEmbeddings, RecordingLLM
 
 TEST_QUERY = "What is the policy on time loop tardiness and Friday refrigerator purges?"
@@ -13,7 +13,7 @@ def pages_for(engine, question):
 
 
 def test_ret_01_returns_top_k(offline_engine):
-    assert len(offline_engine.retriever.invoke(TEST_QUERY)) == rag_engine.TOP_K
+    assert len(offline_engine.retriever.invoke(TEST_QUERY)) == naive_rag_engine.TOP_K
 
 
 def test_ret_02_reference_query_hits_both_sections(offline_engine):
@@ -41,7 +41,7 @@ def test_chn_01_ask_returns_answer_and_context(offline_engine):
     result = offline_engine.ask(TEST_QUERY)
     assert set(result) == {"answer", "context"}
     assert result["answer"] == "FAKE ANSWER"
-    assert len(result["context"]) == rag_engine.TOP_K
+    assert len(result["context"]) == naive_rag_engine.TOP_K
 
 
 def test_chn_02_prompt_contains_context_and_question(offline_engine):
@@ -55,14 +55,14 @@ def test_chn_02_prompt_contains_context_and_question(offline_engine):
 
 
 def test_chn_03_default_model_config():
-    llm = rag_engine.ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key="sk-test")
+    llm = naive_rag_engine.ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key="sk-test")
     assert llm.model_name == "gpt-4o-mini" and llm.temperature == 0
 
 
 def test_chn_04_index_is_reused_without_rebuild(tmp_path):
     kw = dict(persist_dir=tmp_path, embeddings=BagOfWordsEmbeddings(), llm=RecordingLLM())
-    first = rag_engine.RAGEngine(rebuild=True, **kw)
-    second = rag_engine.RAGEngine(**kw)
+    first = naive_rag_engine.NaiveRAGEngine(rebuild=True, **kw)
+    second = naive_rag_engine.NaiveRAGEngine(**kw)
     assert first.loaded_from_disk is False
     assert second.loaded_from_disk is True
     assert second.vectorstore._collection.count() == first.num_chunks
@@ -70,19 +70,19 @@ def test_chn_04_index_is_reused_without_rebuild(tmp_path):
 
 def test_chn_05_rebuild_does_not_duplicate_vectors(tmp_path):
     kw = dict(persist_dir=tmp_path, embeddings=BagOfWordsEmbeddings(), llm=RecordingLLM())
-    a = rag_engine.RAGEngine(rebuild=True, **kw)
-    b = rag_engine.RAGEngine(rebuild=True, **kw)
+    a = naive_rag_engine.NaiveRAGEngine(rebuild=True, **kw)
+    b = naive_rag_engine.NaiveRAGEngine(rebuild=True, **kw)
     assert b.vectorstore._collection.count() == a.num_chunks
 
 
 def test_chn_06_missing_api_key_raises(monkeypatch, tmp_path):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.setattr(rag_engine, "load_dotenv", lambda *a, **k: None)
+    monkeypatch.setattr(naive_rag_engine, "load_dotenv", lambda *a, **k: None)
     with pytest.raises(EnvironmentError):
-        rag_engine.RAGEngine(persist_dir=tmp_path)
+        naive_rag_engine.NaiveRAGEngine(persist_dir=tmp_path)
 
 
 def test_chn_07_missing_pdf_raises(tmp_path):
     with pytest.raises(FileNotFoundError):
-        rag_engine.RAGEngine(pdf_path=tmp_path / "nope.pdf", persist_dir=tmp_path,
+        naive_rag_engine.NaiveRAGEngine(pdf_path=tmp_path / "nope.pdf", persist_dir=tmp_path,
                              embeddings=BagOfWordsEmbeddings(), llm=RecordingLLM())

@@ -45,7 +45,7 @@ def run_cli(monkeypatch, inputs, engine_factory=StubEngine):
         return created[-1]
 
     monkeypatch.setattr(builtins, "input", fake_input)
-    monkeypatch.setattr(cli, "RAGEngine", factory)
+    monkeypatch.setattr(cli, "NaiveRAGEngine", factory)
     monkeypatch.setattr(sys, "argv", ["main.py"])
     return cli.main(), created
 

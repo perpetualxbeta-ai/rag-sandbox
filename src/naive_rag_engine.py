@@ -1,4 +1,4 @@
-"""RAG engine for the Wacky Acme Company Policy handbook.
+"""Naive RAG engine for the Wacky Acme Company Policy handbook.
 
 Pipeline: PyPDFLoader -> RecursiveCharacterTextSplitter -> OpenAIEmbeddings
 -> local Chroma vector store -> retriever -> stuff-documents chain over
@@ -49,7 +49,7 @@ SYSTEM_PROMPT = (
 )
 
 
-class RAGEngine:
+class NaiveRAGEngine:
     """Loads the policy PDF, indexes it in Chroma and answers questions about it."""
 
     def __init__(

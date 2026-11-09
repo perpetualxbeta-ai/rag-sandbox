@@ -11,7 +11,7 @@ import argparse
 import sys
 import textwrap
 
-from rag_engine import RAGEngine
+from naive_rag_engine import NaiveRAGEngine
 
 DIVIDER = "-" * 72
 
@@ -29,9 +29,9 @@ def main() -> int:
     parser.add_argument("--rebuild", action="store_true", help="Rebuild the Chroma index.")
     args = parser.parse_args()
 
-    print("Initialising RAG engine...")
+    print("Initialising naive RAG engine...")
     try:
-        engine = RAGEngine(rebuild=args.rebuild)
+        engine = NaiveRAGEngine(rebuild=args.rebuild)
     except (EnvironmentError, FileNotFoundError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1

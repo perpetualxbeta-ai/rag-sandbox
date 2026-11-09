@@ -1,4 +1,4 @@
-"""Score the RAG engine against the golden question set (evals/golden_qa.json).
+"""Score the naive RAG engine against the golden question set (evals/golden_qa.json).
 
     python evals/run_eval.py                 # live run against OpenAI (needs OPENAI_API_KEY)
     python evals/run_eval.py --judge         # also grade faithfulness with an LLM judge
@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "tests"))
 warnings.filterwarnings("ignore")
 
-from rag_engine import RAGEngine  # noqa: E402
+from naive_rag_engine import NaiveRAGEngine  # noqa: E402
 
 GOLDEN = ROOT / "evals" / "golden_qa.json"
 RESULTS_DIR = ROOT / "evals" / "results"
@@ -100,14 +100,14 @@ def judge(llm, question: str, answer: str, docs) -> dict:
         return {"score": None, "reason": f"unparseable judge output: {raw[:120]}"}
 
 
-def build_engine(offline: bool) -> RAGEngine:
-    persist = Path(tempfile.mkdtemp(prefix="rag_eval_"))
+def build_engine(offline: bool) -> NaiveRAGEngine:
+    persist = Path(tempfile.mkdtemp(prefix="naive_rag_eval_"))
     if offline:
         from fakes import BagOfWordsEmbeddings, ExtractiveLLM
 
-        return RAGEngine(persist_dir=persist, rebuild=True,
+        return NaiveRAGEngine(persist_dir=persist, rebuild=True,
                          embeddings=BagOfWordsEmbeddings(), llm=ExtractiveLLM())
-    return RAGEngine(persist_dir=persist, rebuild=True)
+    return NaiveRAGEngine(persist_dir=persist, rebuild=True)
 
 
 def summarise(rows: list[dict], use_judge: bool) -> dict:
@@ -134,7 +134,7 @@ def write_report(stamp: str, mode: str, rows: list[dict], summary: dict) -> Path
     base.with_suffix(".json").write_text(json.dumps({"mode": mode, **summary, "cases": rows}, indent=2))
 
     tick = lambda ok: "n/a" if ok is None else ("PASS" if ok else "FAIL")  # noqa: E731
-    lines = [f"# RAG eval - {stamp} ({mode})", "",
+    lines = [f"# Naive RAG eval - {stamp} ({mode})", "",
              f"**Overall: {'PASS' if summary['passed'] else 'FAIL'}**", "",
              "| Metric | Value | Gate | Result |", "|---|---|---|---|"]
     for k, v in summary["metrics"].items():

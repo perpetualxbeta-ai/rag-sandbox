@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT / "evals"))
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from fakes import BagOfWordsEmbeddings, RecordingLLM  # noqa: E402
-from rag_engine import RAGEngine  # noqa: E402
+from naive_rag_engine import NaiveRAGEngine  # noqa: E402
 
 PDF_PATH = ROOT / "data" / "Wacky Acme Company Policy.pdf"
 
@@ -21,7 +21,7 @@ PDF_PATH = ROOT / "data" / "Wacky Acme Company Policy.pdf"
 def offline_engine(tmp_path_factory):
     """Real loader/splitter/Chroma/chain wiring with fake embeddings and LLM."""
     llm = RecordingLLM()
-    engine = RAGEngine(
+    engine = NaiveRAGEngine(
         pdf_path=PDF_PATH,
         persist_dir=tmp_path_factory.mktemp("chroma"),
         rebuild=True,
@@ -40,4 +40,4 @@ def live_engine(tmp_path_factory):
     load_dotenv(ROOT / ".env")
     if not os.getenv("OPENAI_API_KEY"):
         pytest.skip("OPENAI_API_KEY not set - skipping live tests")
-    return RAGEngine(persist_dir=tmp_path_factory.mktemp("chroma_live"), rebuild=True)
+    return NaiveRAGEngine(persist_dir=tmp_path_factory.mktemp("chroma_live"), rebuild=True)
