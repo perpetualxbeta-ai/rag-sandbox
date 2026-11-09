@@ -1,8 +1,8 @@
-# Test Plan: Wacky Acme Policy RAG PoC
+# Test Plan: Wacky Acme Policy Naive RAG PoC
 
 | | |
 |---|---|
-| **System under test** | `src/rag_engine.py` (RAGEngine), `src/main.py` (interactive CLI) |
+| **System under test** | `src/naive_rag_engine.py` (NaiveRAGEngine), `src/main.py` (interactive CLI) |
 | **Source of truth** | `data/Wacky Acme Company Policy.pdf` (5 pages, sections 1.0 to 11.2) |
 | **Models** | `OpenAIEmbeddings` (default model), `ChatOpenAI(model="gpt-4o-mini", temperature=0)` |
 | **Status** | Offline suite: 28/28 pass. Live suite and eval: not yet run (requires `OPENAI_API_KEY`). |

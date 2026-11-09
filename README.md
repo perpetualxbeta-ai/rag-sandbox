@@ -1,6 +1,6 @@
 # rag-sandbox
 
-A RAG proof of concept over the *Wacky Acme Company Policy* handbook, built with LangChain, Chroma and OpenAI.
+A naive RAG proof of concept over the *Wacky Acme Company Policy* handbook, built with LangChain, Chroma and OpenAI.
 
 ```
 data/Wacky Acme Company Policy.pdf

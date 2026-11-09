@@ -2,11 +2,11 @@
 
 import unicodedata
 
-import rag_engine
+import naive_rag_engine
 
 
 def test_ing_01_pdf_loads_all_pages(offline_engine):
-    pages = rag_engine.PyPDFLoader(str(offline_engine.pdf_path)).load()
+    pages = naive_rag_engine.PyPDFLoader(str(offline_engine.pdf_path)).load()
     assert len(pages) == 5
     assert all(p.page_content.strip() for p in pages), "a page extracted as empty text"
 
@@ -14,7 +14,7 @@ def test_ing_01_pdf_loads_all_pages(offline_engine):
 def test_ing_02_chunk_size_respected(offline_engine):
     chunks = offline_engine.load_and_split()
     assert chunks, "no chunks produced"
-    assert max(len(c.page_content) for c in chunks) <= rag_engine.CHUNK_SIZE
+    assert max(len(c.page_content) for c in chunks) <= naive_rag_engine.CHUNK_SIZE
 
 
 def test_ing_03_chunks_overlap(offline_engine):
